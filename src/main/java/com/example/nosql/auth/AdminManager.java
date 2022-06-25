@@ -1,6 +1,9 @@
-package com.example.nosql;
+package com.example.nosql.auth;
 
+import com.example.nosql.LoadBalance;
+import com.example.nosql.MasterDB;
 import com.example.nosql.schema.UsersDB;
+import com.example.nosql.schema.UsersDBToken;
 import com.example.nosql.shared.SharedClass;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +32,6 @@ public class AdminManager  {
     public AdminManager(){}
 
 
-
     public String connect(UsersDB userdb) {
 
         String result = null;
@@ -54,26 +56,32 @@ public class AdminManager  {
 
     }
 
-    public String createUser(UsersDB userdb) {
+    public UsersDBToken register(UsersDB userdb) {
 
-        String result = null;
-        int uuid = userdb.getUuid();
-        //int objNum = SharedClass.checkForDocuments(service.getUserDatabase().getUniqueIndex());
+        Gson json = new Gson();
         int objNum = SharedClass.checkForDocuments(userDatabase.getUniqueIndex());
         String filename = String.valueOf(objNum);
+        //    synchronized (this) {
+        String dir = userDatabase.getDirectoryDB().getCOLLECTION_DIR();
         userdb.setUuid(objNum);
-   /*     Gson json = new Gson();
-        String dir = service.getUserDatabase().getDirectoryDB().getCOLLECTION_DIR();
+        logger.info(userdb.getUuid()+ " "+userdb.getUsername()+" "+userdb.getPassword()+" "+userdb.getDatabase());
+        UsersDBToken userdbToken = new UsersDBToken(userdb.getUsername(),userdb.getPassword());
+        CreateJWT createUserdbToken = new CreateJWT(userdbToken);
+
+        userdbToken.setToken(createUserdbToken.getJWTToken());
         try (Writer writer = new FileWriter(dir + filename + ".json")) {
             json.toJson(userdb, writer);
-            service.getUserDatabase().addUniqueIndex(userdb);
-            service.getUserDatabase().addPropertyIndex(userdb);
+            userDatabase.addUniqueIndex(userdb.getUuid());
+            userDatabase.addPropertyIndex(userdb.getUsername(),String.valueOf(userdb.getUuid()));
         }catch (IOException e) {
             e.printStackTrace();
-        }*/
+        }
+        try (Writer writer = new FileWriter(dir + filename + "Key.json")) {
+            json.toJson(userdbToken, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-
-        return result;
-
+        return userdbToken;
     }
 }

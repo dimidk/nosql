@@ -12,6 +12,7 @@ public class UsersDB implements Comparable{
     String username;
     @JsonProperty("password")
     String password;
+
     @JsonProperty
     String role;
     @JsonProperty("database")
@@ -62,6 +63,7 @@ public class UsersDB implements Comparable{
     public void setDatabase(String database) {
         this.database = database;
     }
+
 
     @Override
     public int compareTo(Object o) {

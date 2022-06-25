@@ -45,48 +45,52 @@ public abstract class PrimitiveDatabase {
         this.propertyIndex = propertyIndex;
     }
 
-    public void addPropertyIndex(Student stud) {
+//   public void addPropertyIndex(Student stud) {
+    public void addPropertyIndex(String name, String uuid) {
 
-        if (stud == null) {
+        if (name == null) {
             //    logger.info("ERROR");
             throw new IllegalArgumentException();
         }
         //    if (this.getPropertyIndex().containsKey(stud.getSurname()))
-        if (propertyIndex.containsKey(stud.getSurname()))
-            propertyIndex.get(stud.getSurname()).add(String.valueOf(stud.getUuid()));
+        if (propertyIndex.containsKey(name))
+            propertyIndex.get(name).add(String.valueOf(uuid));
         else {
-            propertyIndex.put(stud.getSurname(),new ArrayList<>());
-            propertyIndex.get(stud.getSurname()).add(String.valueOf(stud.getUuid()));
+            propertyIndex.put(name,new ArrayList<>());
+            propertyIndex.get(name).add(String.valueOf(uuid));
         }
     }
 
-    public void deletePropertyIndex(Student stud) {
 
-        if (stud == null)
+
+//    public void deletePropertyIndex(Student stud) {
+    public void deletePropertyIndex(String name,String uuid) {
+
+        if (name == null)
             throw new IllegalArgumentException();
 
-        List<String> temp = this.getPropertyIndex().get(stud.getSurname());
-        propertyIndex.remove(stud.getSurname(),temp);
+        List<String> temp = this.getPropertyIndex().get(name);
+        propertyIndex.remove(name,temp);
 
-        temp.remove(String.valueOf(stud.getUuid()));
-        propertyIndex.put(stud.getSurname(),temp);
+        temp.remove(String.valueOf(uuid));
+        propertyIndex.put(name,temp);
     }
 
-    public void addUniqueIndex(Student stud) {
+    public void addUniqueIndex(int uuid) {
 
-        if (stud == null) {
+        if (uuid == -1) {
             throw new IllegalArgumentException();
         }
-        uniqueIndex.add(stud.getUuid());
+        uniqueIndex.add(uuid);
     }
 
-    public void deleteUniqueIndex(Student stud) {
+    public void deleteUniqueIndex(int uuid) {
 
 
-        if (stud == null) {
+        if (uuid == -1) {
             throw new IllegalArgumentException();
         }
-        uniqueIndex.remove(stud.getUuid());
+        uniqueIndex.remove(uuid);
 
     }
 

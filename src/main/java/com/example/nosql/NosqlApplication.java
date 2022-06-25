@@ -35,13 +35,14 @@ public class NosqlApplication {
         dirMaster.setDATABASE_DIR("db");
         dirMaster.setCOLLECTION_DIR("db/student/");
         masterDB.setDirectoryDB(dirMaster);
+        masterDB.createDbDir();
 
         DirectoryClass dirUser = new DirectoryClass();
         dirUser.setDATABASE_DIR("usersDB");
         dirUser.setCOLLECTION_DIR("usersDB/");
         MasterDB userDatabase = context.getBean("userDatabase",MasterDB.class);
         userDatabase.setDirectoryDB(dirUser);
-
+        userDatabase.createDbDir();
     }
 
 }

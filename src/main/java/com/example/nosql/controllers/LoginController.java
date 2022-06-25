@@ -1,8 +1,9 @@
 package com.example.nosql.controllers;
 
-import com.example.nosql.AdminManager;
+import com.example.nosql.auth.AdminManager;
 import com.example.nosql.LoadBalance;
 import com.example.nosql.schema.UsersDB;
+import com.example.nosql.schema.UsersDBToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,16 +72,13 @@ public class LoginController {
         return responseEntity;
     }
 
-   /* @PostMapping("/create-user")
-    public String createUser(@RequestBody UsersDB user) {
+    @PostMapping("/registration")
+    public UsersDBToken register(@RequestBody UsersDB user) {
 
-        //Authentication auth = getAuth();
-
-        //String username = authName(auth);
-        logger.info("in connection control");
-        String result = adminManager.connect(user);
-        return result;
-    }*/
+        logger.info("register new User");
+        UsersDBToken usersDBToken = adminManager.register(user);
+        return usersDBToken;
+    }
 
     @GetMapping("/disconnect")
     public String disconnect() {

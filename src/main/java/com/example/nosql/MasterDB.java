@@ -76,8 +76,8 @@ public class MasterDB extends PrimitiveDatabase {
                     try (Reader reader = new FileReader(String.valueOf(s))) {
                         Student student = json.fromJson(reader, Student.class);
 
-                        addPropertyIndex(student);
-                        addUniqueIndex(student);
+                        addPropertyIndex(student.getSurname(),String.valueOf(student.getUuid()));
+                        addUniqueIndex(student.getUuid());
                         logger.info(getPropertyIndex().size());
                         logger.info(getUniqueIndex().size());
 

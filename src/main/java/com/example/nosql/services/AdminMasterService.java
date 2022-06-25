@@ -62,9 +62,9 @@ public class AdminMasterService implements AdminInterface {
             logger.info("write new student to db");
             logger.info("add new student to indexes:"+student.getUuid() +student.getSurname()+student.getGrade());
             logger.info("indexes size unique,property:"+service.getMasterDB().getUniqueIndex().size()+ service.getMasterDB().getPropertyIndex().size());
-            service.getMasterDB().addUniqueIndex(student);
+            service.getMasterDB().addUniqueIndex(student.getUuid());
             logger.info("unique index:"+service.getMasterDB().getUniqueIndex().size());
-            service.getMasterDB().addPropertyIndex(student);
+            service.getMasterDB().addPropertyIndex(student.getSurname(),String.valueOf(student.getUuid()));
             logger.info("unique index:"+service.getMasterDB().getPropertyIndex().size());
         } catch (IOException e) {
             e.printStackTrace();
@@ -103,8 +103,8 @@ public class AdminMasterService implements AdminInterface {
         student = SharedClass.fromJson(Integer.valueOf(uuid));
 
 
-        service.getMasterDB().deletePropertyIndex(student);
-        service.getMasterDB().deleteUniqueIndex(student);
+        service.getMasterDB().deletePropertyIndex(student.getSurname(),String.valueOf(student.getUuid()));
+        service.getMasterDB().deleteUniqueIndex(student.getUuid());
         try {
             Files.delete(Path.of(service.getMasterDB().getDirectoryDB().getCOLLECTION_DIR() + uuid + ".json"));
         }catch (IOException e) {
