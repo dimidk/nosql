@@ -1,24 +1,28 @@
 package com.example.nosql.controllers;
 
-import com.example.nosqldb.AdminManager;
-import com.example.nosqldb.LoadBalance;
-import com.example.nosqldb.schema.UsersDB;
+import com.example.nosql.AdminManager;
+import com.example.nosql.LoadBalance;
+import com.example.nosql.schema.UsersDB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
+
 @RestController
 public class LoginController {
 
-    private Logger logger = LogManager.getLogger(CRUDControllers.class);
+    private Logger logger = LogManager.getLogger(LoginController.class);
     @Autowired
-    private static LoadBalance loadBalance;
+    private LoadBalance loadBalance;
     @Autowired
-    private static AdminManager adminManager;
+    private AdminManager adminManager;
 
     /*protected String authName(Authentication auth) {
 
@@ -51,15 +55,32 @@ public class LoginController {
     }
 
     @PostMapping("/connect")
-    public String connect(@RequestBody UsersDB user) {
+    //public String connect(@RequestBody UsersDB user) {
+    public ResponseEntity<Void> connect(@RequestBody UsersDB user) {
 
         //Authentication auth = getAuth();
 
         //String username = authName(auth);
         logger.info("in connection control");
         String result = adminManager.connect(user);
-        return null;
+        ResponseEntity<Void> responseEntity = null;
+
+        if (!result.equals("false")) {
+            responseEntity = ResponseEntity.status(HttpStatus.FOUND).location(URI.create(result)).build();
+        }
+        return responseEntity;
     }
+
+   /* @PostMapping("/create-user")
+    public String createUser(@RequestBody UsersDB user) {
+
+        //Authentication auth = getAuth();
+
+        //String username = authName(auth);
+        logger.info("in connection control");
+        String result = adminManager.connect(user);
+        return result;
+    }*/
 
     @GetMapping("/disconnect")
     public String disconnect() {
