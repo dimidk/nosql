@@ -50,7 +50,7 @@ public class LoginController {
 
     @GetMapping("/default-user")
     public String defaultuser() {
-
+        logger.info("in default user");
 
         return "index";
     }

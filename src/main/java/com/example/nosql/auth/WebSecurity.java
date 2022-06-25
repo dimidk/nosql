@@ -23,12 +23,12 @@ public class WebSecurity {
         http.csrf().disable()
                 .addFilterAt(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests()
-                .antMatchers("/default-user").permitAll()
-                .antMatchers("/login").permitAll()
-                .antMatchers("/registration").permitAll()
-                .antMatchers("/write")
-                .hasAnyRole("ADMIN")
-                .antMatchers("/update")
+                .antMatchers("/default-user/**").permitAll()
+                .antMatchers("/login/**").permitAll()
+                .antMatchers("/registration/**").permitAll()
+                .antMatchers("/write/**")
+                .hasRole("ADMIN")
+                .antMatchers("/update/**")
                 .hasRole("ADMIN")
                 .anyRequest().authenticated();
         return http.build();
