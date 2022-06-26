@@ -11,6 +11,7 @@ import java.util.TreeSet;
 public abstract class PrimitiveDatabase {
 
     private DirectoryClass directoryDB;
+    private String dbName;
     protected static InitialService server;
 
     private TreeSet<Integer> uniqueIndex = new TreeSet<>();
@@ -19,6 +20,14 @@ public abstract class PrimitiveDatabase {
     public PrimitiveDatabase(InitialService server) {
 
         this.server = server;
+    }
+
+    public String getDbName() {
+        return dbName;
+    }
+
+    public void setDbName(String dbName) {
+        this.dbName = dbName;
     }
 
     public DirectoryClass getDirectoryDB() {

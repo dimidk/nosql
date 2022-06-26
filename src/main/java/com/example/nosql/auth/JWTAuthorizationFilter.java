@@ -1,4 +1,4 @@
-package com.example.nosql.auth;
+/*package com.example.nosql.auth;
 
 import io.jsonwebtoken.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -67,4 +67,4 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
         return true;
     }
 
-}
+}*/

@@ -49,6 +49,9 @@ public class AdminMasterService implements AdminInterface {
             System.exit(-1);
 
         logger.info("get a student object");
+        logger.info(service.getMasterDB().getDbName());
+        logger.info(service.getUserDatabase().getDbName());
+        logger.info(service.getMasterDB().getDirectoryDB().getCOLLECTION_DIR());
         if (!service.dbDirExists())
             service.createDbDir();
         Gson json = new Gson();
@@ -91,7 +94,7 @@ public class AdminMasterService implements AdminInterface {
         //update wants two parameters one uuid and one the update field
 
         Student student = null;
-        student = SharedClass.fromJson(Integer.valueOf(field));
+        student = sharedClass.fromJson(Integer.valueOf(field),service.getMasterDB());
         student.setGrade(field);
 
     }
@@ -100,7 +103,7 @@ public class AdminMasterService implements AdminInterface {
     public  void delete(String uuid)  {
 
         Student student = null;
-        student = SharedClass.fromJson(Integer.valueOf(uuid));
+        student = sharedClass.fromJson(Integer.valueOf(uuid),service.getMasterDB());
 
 
         service.getMasterDB().deletePropertyIndex(student.getSurname(),String.valueOf(student.getUuid()));
@@ -136,7 +139,7 @@ public class AdminMasterService implements AdminInterface {
             Files.write(Paths.get(filename), service.getMasterDB().getDirectoryDB().getCOLLECTION_DIR().getBytes(), StandardOpenOption.APPEND);
             uniqIndex.stream().sorted().forEach(s -> {
 
-                Student student = SharedClass.fromJson(s);
+                Student student = sharedClass.fromJson(s,service.getMasterDB());
                 Gson json = new Gson();
                 String jsonString = json.toJson(student);
                 try {

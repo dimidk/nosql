@@ -1,4 +1,4 @@
-package com.example.nosql.auth;
+/*package com.example.nosql.auth;
 
 import com.example.nosql.schema.UsersDBToken;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -41,4 +41,4 @@ public class CreateJWT {
 
         return "Bearer " + token;
     }
-}
+}*/

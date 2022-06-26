@@ -20,6 +20,9 @@ public class NosqlApplication {
         return restTemplate;
     };
 
+
+
+
     public static void main(String[] args) {
 
         SpringApplication.run(NosqlApplication.class, args);
@@ -27,22 +30,26 @@ public class NosqlApplication {
         ApplicationContext context
                 = new AnnotationConfigApplicationContext(
                 DatabaseConfig.class);
-
-
-    //    DirectoryClass dirMaster = context.getBean("dirMaster",DirectoryClass.class);
         MasterDB masterDB = context.getBean("masterDB",MasterDB.class);
-        DirectoryClass dirMaster = new DirectoryClass();
-        dirMaster.setDATABASE_DIR("db");
-        dirMaster.setCOLLECTION_DIR("db/student/");
-        masterDB.setDirectoryDB(dirMaster);
-        masterDB.createDbDir();
-
-        DirectoryClass dirUser = new DirectoryClass();
-        dirUser.setDATABASE_DIR("usersDB");
-        dirUser.setCOLLECTION_DIR("usersDB/");
         MasterDB userDatabase = context.getBean("userDatabase",MasterDB.class);
-        userDatabase.setDirectoryDB(dirUser);
-        userDatabase.createDbDir();
+
+        System.out.println(masterDB.getDbName());
+       /* @Bean
+        MasterDB masterDB(){
+            return context.getBean("masterDB",MasterDB.class);
+        } ;
+        @Bean
+        MasterDB userDatabase() {
+
+            return context.getBean("userDatabase",MasterDB.class);
+
+        } ;*/
+
+
+        server.initializeDatabases();
+
+
+
     }
 
 }

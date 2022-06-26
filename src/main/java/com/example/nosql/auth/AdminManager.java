@@ -28,6 +28,7 @@ public class AdminManager  {
     private RestTemplate restTemplate;
     @Autowired
     private MasterDB userDatabase;
+    private SharedClass sharedClass;
     @Autowired
     public AdminManager(){}
 
@@ -37,8 +38,9 @@ public class AdminManager  {
         String result = null;
         String db = null;
         int uuid = userdb.getUuid();
-        UsersDB user = SharedClass.fromJsonUser(uuid);
-        if (user.getUuid() == userdb.getUuid()) {
+
+        UsersDB user = sharedClass.fromJsonUser(uuid);
+        if (user.getUuid() == userdb.getUuid() ) {
             result = "true";
             String database = userdb.getDatabase();
             db = database;
@@ -51,37 +53,52 @@ public class AdminManager  {
         String node  = loadBalance.roundRobin(db);
         loadBalance.setUserToNode(String.valueOf(uuid),node);
 
+        if (node == null)
+            return db;
+
         result = node;
         return result;
 
     }
 
-    public UsersDBToken register(UsersDB userdb) {
+    public String register(UsersDB userdb) {
 
         Gson json = new Gson();
         int objNum = SharedClass.checkForDocuments(userDatabase.getUniqueIndex());
         String filename = String.valueOf(objNum);
         //    synchronized (this) {
+        logger.info(userdb.getUuid()+" "+userdb.getUsername()+" "+userdb.getPassword());
+        logger.info(userDatabase.getDbName());
+        logger.info(userDatabase.getDirectoryDB().getDATABASE_DIR());
+        logger.info(userDatabase.getDirectoryDB().getCOLLECTION_DIR());
         String dir = userDatabase.getDirectoryDB().getCOLLECTION_DIR();
         userdb.setUuid(objNum);
         logger.info(userdb.getUuid()+ " "+userdb.getUsername()+" "+userdb.getPassword()+" "+userdb.getDatabase());
-        UsersDBToken userdbToken = new UsersDBToken(userdb.getUsername(),userdb.getPassword());
-        CreateJWT createUserdbToken = new CreateJWT(userdbToken);
-
-        userdbToken.setToken(createUserdbToken.getJWTToken());
-        try (Writer writer = new FileWriter(dir + filename + ".json")) {
+        try (Writer writer = new FileWriter(dir + filename + userdb.getUsername() +".json")) {
             json.toJson(userdb, writer);
             userDatabase.addUniqueIndex(userdb.getUuid());
             userDatabase.addPropertyIndex(userdb.getUsername(),String.valueOf(userdb.getUuid()));
         }catch (IOException e) {
             e.printStackTrace();
         }
-        try (Writer writer = new FileWriter(dir + filename + "Key.json")) {
+        return "OK! User created";
+    }
+
+
+    /*public UsersDBToken auth(UsersDB userdb) {
+
+        UsersDBToken userdbToken = new UsersDBToken(userdb.getUsername(),userdb.getPassword());
+        CreateJWT createUserdbToken = new CreateJWT(userdbToken);
+        String dir = userDatabase.getDirectoryDB().getCOLLECTION_DIR();
+        userdbToken.setToken(createUserdbToken.getJWTToken());
+        Gson json = new Gson();
+        try (Writer writer = new FileWriter(dir + userdb.getUsername() + "Key.json")) {
             json.toJson(userdbToken, writer);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return userdbToken;
-    }
+
+    }*/
 }

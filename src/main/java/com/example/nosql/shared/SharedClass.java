@@ -51,14 +51,20 @@ public class SharedClass {
         return masterDB.getDirectoryDB().getCOLLECTION_DIR();
     }
 
-    public static Student fromJson(int field) {
+    public  Student fromJson(int field,MasterDB db) {
 
         Student student = null;
         Gson json = new Gson();
 
-        //String dir = getDirMaster();
+        String dir = null;
+        dir = db.getDirectoryDB().getCOLLECTION_DIR();
         //String dir = this.masterDB.getDirectoryDB().getCOLLECTION_DIR();
-        try (Reader reader = new FileReader(String.valueOf(field)+".json")) {
+        /*if (db.getDbName().equals("db"))
+            dir = masterDB.getDirectoryDB().getCOLLECTION_DIR();
+        else
+            dir = userDatabase.getDirectoryDB().getCOLLECTION_DIR();*/
+
+        try (Reader reader = new FileReader(dir+String.valueOf(field)+".json")) {
             student = json.fromJson(reader,Student.class);
             logger.info(student.getUuid());
 
@@ -68,7 +74,7 @@ public class SharedClass {
         return student;
     }
 
-    public static UsersDB fromJsonUser(int field) {
+    public  UsersDB fromJsonUser(int field) {
 
         UsersDB userdb = null;
         Gson json = new Gson();

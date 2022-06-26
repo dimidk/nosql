@@ -1,4 +1,4 @@
-package com.example.nosql.auth;
+/*package com.example.nosql.auth;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -20,17 +20,15 @@ public class WebSecurity {
         //http.csrf().disable();
         //http.httpBasic();
         http.formLogin().disable();
-        http.csrf().disable()
-                .addFilterAt(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
+        http.cors().and()
+
                 .authorizeHttpRequests()
-                .antMatchers("/default-user/**").permitAll()
-                .antMatchers("/login/**").permitAll()
-                .antMatchers("/registration/**").permitAll()
-                .antMatchers("/write/**")
-                .hasRole("ADMIN")
-                .antMatchers("/update/**")
-                .hasRole("ADMIN")
-                .anyRequest().authenticated();
+                .antMatchers("/connect/**").permitAll()
+                .antMatchers("/registration**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .addFilterAt(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
-}
+}*/
