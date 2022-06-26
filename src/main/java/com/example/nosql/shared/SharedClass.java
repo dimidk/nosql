@@ -16,19 +16,23 @@ import org.springframework.web.client.RestTemplate;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@Component
+//@Component
 public class SharedClass {
 
     private static Logger logger = LogManager.getLogger(SharedClass.class);
     @Autowired
     private  RestTemplate restTemplate;
-    @Autowired
-    private MasterDB masterDB;
-    @Autowired
-    private MasterDB userDatabase;
+   // @Autowired
+   // private MasterDB masterDB;
+   // @Autowired
+   // private MasterDB userDatabase;
 
     @Autowired
     public SharedClass(RestTemplate restTemplate){
@@ -41,7 +45,7 @@ public class SharedClass {
         return numOfDocuments++;
     }
 
-    public String getDirUsers() {
+    /*public String getDirUsers() {
 
         return userDatabase.getDirectoryDB().getCOLLECTION_DIR();
     }
@@ -49,7 +53,7 @@ public class SharedClass {
     public String getDirMaster() {
 
         return masterDB.getDirectoryDB().getCOLLECTION_DIR();
-    }
+    }*/
 
     public  Student fromJson(int field,MasterDB db) {
 
@@ -57,12 +61,13 @@ public class SharedClass {
         Gson json = new Gson();
 
         String dir = null;
+        String filename = null;
         dir = db.getDirectoryDB().getCOLLECTION_DIR();
         //String dir = this.masterDB.getDirectoryDB().getCOLLECTION_DIR();
         /*if (db.getDbName().equals("db"))
-            dir = masterDB.getDirectoryDB().getCOLLECTION_DIR();
+            filename = String.valueOf(field);
         else
-            dir = userDatabase.getDirectoryDB().getCOLLECTION_DIR();*/
+            filename =*/
 
         try (Reader reader = new FileReader(dir+String.valueOf(field)+".json")) {
             student = json.fromJson(reader,Student.class);
@@ -74,12 +79,18 @@ public class SharedClass {
         return student;
     }
 
-    public  UsersDB fromJsonUser(int field) {
+//    public  UsersDB fromJsonUser(int field) {
+    public  UsersDB fromJsonUser(String field,MasterDB userDatabase) {
 
         UsersDB userdb = null;
         Gson json = new Gson();
         //String dirUsers = getDirUsers();
-        try (Reader reader = new FileReader(String.valueOf(field)+".json")) {
+        logger.info("testing for getting a message from UsersDB");
+        logger.info(userDatabase.getDbName()+" with dir:"+userDatabase.getDirectoryDB().getDATABASE_DIR());
+        String dir = userDatabase.getDirectoryDB().getCOLLECTION_DIR();
+        logger.info("shared class retrieving for usersdb dir:"+dir);
+        logger.info("try to see if user:"+field +" exists");
+        try (Reader reader = new FileReader(dir+(field)+".json")) {
             userdb = json.fromJson(reader,UsersDB.class);
             logger.info(userdb.getUuid());
 
@@ -96,7 +107,7 @@ public class SharedClass {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        responseEntity = restTemplate.exchange("http://localhost:9080/"+restUrl,
+        responseEntity = restTemplate.exchange("http://localhost:8040/"+restUrl,
                 //    responseEntity = restTemplate.exchange("http://slavedb:9080/read",
                 HttpMethod.GET,
                 null,
@@ -115,6 +126,18 @@ public class SharedClass {
 
         return students;
     }
+
+    public List<Path> listFiles(Path path) throws IOException {
+
+        List<Path> result;
+        try (Stream<Path> walk = Files.walk(path)) {
+            result = walk.filter(Files::isRegularFile)
+                    .collect(Collectors.toList());
+        }
+        return result;
+    }
+
+
     public static HttpStatus returnStatus(List<Student> students) {
 
         logger.info("return status request");

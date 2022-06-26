@@ -22,9 +22,14 @@ public class LoadBalance  {
     @Autowired
     public LoadBalance() {
         this.databaseInstance = new LinkedList<>();
-        this.databaseInstance.add("http://node-1:8040/");
+        /*this.databaseInstance.add("http://node-1:8040/");
         this.databaseInstance.add("http://node-2:8050/");
-        this.databaseInstance.add("http://node-3:8060/");
+        this.databaseInstance.add("http://node-3:8060/");*/
+
+        this.databaseInstance.add("http://localhost:8040/");
+        this.databaseInstance.add("http://localhost:8050/");
+        this.databaseInstance.add("http://localhost:8060/");
+
     }
 
 

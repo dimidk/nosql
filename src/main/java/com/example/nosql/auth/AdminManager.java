@@ -28,7 +28,7 @@ public class AdminManager  {
     private RestTemplate restTemplate;
     @Autowired
     private MasterDB userDatabase;
-    private SharedClass sharedClass;
+    private SharedClass sharedClass = new SharedClass(restTemplate);
     @Autowired
     public AdminManager(){}
 
@@ -38,8 +38,10 @@ public class AdminManager  {
         String result = null;
         String db = null;
         int uuid = userdb.getUuid();
-
-        UsersDB user = sharedClass.fromJsonUser(uuid);
+        logger.info("checking for connection");
+        logger.info(userdb.getUuid()+ " "+userdb.getUsername() + " in database:"+userDatabase.getDbName());
+        UsersDB user = sharedClass.fromJsonUser(userdb.getUsername(),userDatabase);
+        logger.info("checking with user in usersdb:"+user.getUsername());
         if (user.getUuid() == userdb.getUuid() ) {
             result = "true";
             String database = userdb.getDatabase();
@@ -74,7 +76,7 @@ public class AdminManager  {
         String dir = userDatabase.getDirectoryDB().getCOLLECTION_DIR();
         userdb.setUuid(objNum);
         logger.info(userdb.getUuid()+ " "+userdb.getUsername()+" "+userdb.getPassword()+" "+userdb.getDatabase());
-        try (Writer writer = new FileWriter(dir + filename + userdb.getUsername() +".json")) {
+        try (Writer writer = new FileWriter(dir + /*filename +*/ userdb.getUsername() +".json")) {
             json.toJson(userdb, writer);
             userDatabase.addUniqueIndex(userdb.getUuid());
             userDatabase.addPropertyIndex(userdb.getUsername(),String.valueOf(userdb.getUuid()));

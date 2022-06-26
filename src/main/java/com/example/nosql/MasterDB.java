@@ -1,9 +1,12 @@
 package com.example.nosql;
 
 import com.example.nosql.schema.Student;
+import com.example.nosql.schema.UsersDB;
+import com.example.nosql.shared.SharedClass;
 import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -18,13 +21,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MasterDB extends PrimitiveDatabase {
 
     private static Logger logger = LogManager.getLogger(MasterDB.class);
 
-    public MasterDB(InitialService server) {
-        super(server);
+    public MasterDB(/*InitialService server,*/DirectoryClass directoryClass,String dbName) {
+       // super(server,directoryClass);
+        super(directoryClass,dbName);
     }
 
     public boolean dbDirExists() {
@@ -55,6 +61,16 @@ public class MasterDB extends PrimitiveDatabase {
 
     }
 
+    public List<Path> listFiles(Path path) throws IOException {
+
+        List<Path> result;
+        try (Stream<Path> walk = Files.walk(path)) {
+            result = walk.filter(Files::isRegularFile)
+                    .collect(Collectors.toList());
+        }
+        return result;
+    }
+
     @Override
     public void loadDatabase(String dir) throws IOException {
 
@@ -70,14 +86,23 @@ public class MasterDB extends PrimitiveDatabase {
 
             if (Files.exists(Path.of(dir))) {
                 logger.info("directory exists");
-                List<Path> files = PrimitiveDatabase.server.listFiles(Path.of(dir));
+                //List<Path> files = PrimitiveDatabase.server.listFiles(Path.of(dir));
+                //List<Path> files = server.listFiles(Path.of(dir));
+                List<Path> files = listFiles(Path.of(dir));
                 files.forEach(s -> {
                     Gson json = new Gson();
                     try (Reader reader = new FileReader(String.valueOf(s))) {
-                        Student student = json.fromJson(reader, Student.class);
+                        if (this.getDbName().equals("db")) {
+                            Student student = json.fromJson(reader, Student.class);
 
-                        addPropertyIndex(student.getSurname(),String.valueOf(student.getUuid()));
-                        addUniqueIndex(student.getUuid());
+                            addPropertyIndex(student.getSurname(), String.valueOf(student.getUuid()));
+                            addUniqueIndex(student.getUuid());
+                        }
+                        else {
+                            UsersDB usersDB = json.fromJson(reader,UsersDB.class);
+                            addPropertyIndex(usersDB.getUsername(), String.valueOf(usersDB.getUuid()));
+                            addUniqueIndex(usersDB.getUuid());
+                        }
                         logger.info(getPropertyIndex().size());
                         logger.info(getUniqueIndex().size());
 

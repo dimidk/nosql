@@ -31,8 +31,8 @@ public class AdminMasterService implements AdminInterface {
     private InitialService service ;
     @Autowired
     private RestTemplate restTemplate;
-    @Autowired
-    private SharedClass sharedClass;
+    //@Autowired
+    private SharedClass sharedClass = new SharedClass(restTemplate);
 
     private Logger logger = LogManager.getLogger(AdminMasterService.class);
     @Autowired

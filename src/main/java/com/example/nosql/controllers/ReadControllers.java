@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 @RestController
-@Configuration
+//@Configuration
 public class ReadControllers {
 
     @Autowired
@@ -25,8 +25,8 @@ public class ReadControllers {
 
     /*@Autowired
     private ManageCRUDServices services;*/
-    @Autowired
-    private SharedClass sharedClass;
+   // @Autowired
+    private SharedClass sharedClass = new SharedClass(restTemplate);
 
     private Logger logger = LogManager.getLogger(ReadControllers.class);
 

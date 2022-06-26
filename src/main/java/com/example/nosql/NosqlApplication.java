@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 public class NosqlApplication {
 
-    @Autowired
+    //@Autowired
     private static InitialService server = InitialService.getInitialService();
 
     @Bean
@@ -43,6 +43,7 @@ public class NosqlApplication {
                 DatabaseConfig.class);
         MasterDB masterDB = context.getBean("masterDB",MasterDB.class);
         MasterDB userDatabase = context.getBean("userDatabase",MasterDB.class);
+        //server.initializeDatabases();
 
         //System.out.println(masterDB.getDbName());
        /* @Bean

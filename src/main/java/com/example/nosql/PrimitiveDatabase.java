@@ -1,7 +1,5 @@
 package com.example.nosql;
 
-import com.example.nosql.schema.Student;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,14 +10,15 @@ public abstract class PrimitiveDatabase {
 
     private DirectoryClass directoryDB;
     private String dbName;
-    protected static InitialService server;
 
     private TreeSet<Integer> uniqueIndex = new TreeSet<>();
     private TreeMap<String, List<String>> propertyIndex = new TreeMap<>();
 
-    public PrimitiveDatabase(InitialService server) {
+    //public PrimitiveDatabase(InitialService server,DirectoryClass directoryClass) {
+    public PrimitiveDatabase(DirectoryClass directoryClass,String dbName) {
 
-        this.server = server;
+        this.directoryDB = directoryClass;
+        this.dbName = dbName;
     }
 
     public String getDbName() {
@@ -70,9 +69,6 @@ public abstract class PrimitiveDatabase {
         }
     }
 
-
-
-//    public void deletePropertyIndex(Student stud) {
     public void deletePropertyIndex(String name,String uuid) {
 
         if (name == null)

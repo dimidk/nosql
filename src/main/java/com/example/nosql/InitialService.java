@@ -89,18 +89,16 @@ public class InitialService {
 
         logger.info("info for other initializations");
 
-        DirectoryClass dirMaster = new DirectoryClass();
-        dirMaster.setDATABASE_DIR("db");
-        dirMaster.setCOLLECTION_DIR("db/student/");
-        logger.info("setting directory for master db");
-        this.masterDB.setDirectoryDB(dirMaster);
-        masterDB.setDbName("db");
-        masterDB.createDbDir();
-
-
+        String dir = masterDB.getDirectoryDB().getCOLLECTION_DIR();
+        logger.info("db's directory"+dir);
+        try {
+            masterDB.loadDatabase(dir);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public List<Path> listFiles(Path path) throws IOException {
+    /*public List<Path> listFiles(Path path) throws IOException {
 
         List<Path> result;
         try (Stream<Path> walk = Files.walk(path)) {
@@ -108,7 +106,7 @@ public class InitialService {
                     .collect(Collectors.toList());
         }
         return result;
-    }
+    }*/
 
     public boolean dbDirExists() {
 
