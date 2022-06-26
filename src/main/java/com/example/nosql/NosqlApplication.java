@@ -20,6 +20,17 @@ public class NosqlApplication {
         return restTemplate;
     };
 
+   /* @Bean
+    MasterDB masterDB() {
+        MasterDB masterDB = new MasterDB(server);
+        return masterDB;
+    };
+
+    @Bean
+    MasterDB userDatabase() {
+        MasterDB userDatabase = new MasterDB(server);
+        return userDatabase;
+    };*/
 
 
 
@@ -33,7 +44,7 @@ public class NosqlApplication {
         MasterDB masterDB = context.getBean("masterDB",MasterDB.class);
         MasterDB userDatabase = context.getBean("userDatabase",MasterDB.class);
 
-        System.out.println(masterDB.getDbName());
+        //System.out.println(masterDB.getDbName());
        /* @Bean
         MasterDB masterDB(){
             return context.getBean("masterDB",MasterDB.class);
@@ -46,7 +57,7 @@ public class NosqlApplication {
         } ;*/
 
 
-        server.initializeDatabases();
+        //server.initializeDatabases();
 
 
 

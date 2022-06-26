@@ -86,21 +86,18 @@ public class InitialService {
     }
 
     public void initializeDatabases() {
+
+        logger.info("info for other initializations");
+
         DirectoryClass dirMaster = new DirectoryClass();
         dirMaster.setDATABASE_DIR("db");
         dirMaster.setCOLLECTION_DIR("db/student/");
         logger.info("setting directory for master db");
-        masterDB.setDirectoryDB(dirMaster);
+        this.masterDB.setDirectoryDB(dirMaster);
         masterDB.setDbName("db");
         masterDB.createDbDir();
 
-        DirectoryClass dirUser = new DirectoryClass();
-        dirUser.setDATABASE_DIR("usersDB");
-        dirUser.setCOLLECTION_DIR("usersDB/");
 
-        userDatabase.setDirectoryDB(dirUser);
-        userDatabase.setDbName("usersDB");
-        userDatabase.createDbDir();
     }
 
     public List<Path> listFiles(Path path) throws IOException {
