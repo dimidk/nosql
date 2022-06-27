@@ -49,11 +49,23 @@ public class AdminControllers {
     }
 
 
-    @PutMapping("/update/{field}")
-    public void update(@PathVariable String field) {
+    @PutMapping("/update/{uuid}/grade/{field}")
+    public Student update_grade(@PathVariable String uuid,@PathVariable String field) {
 
         logger.info("update certain student");
-        adminServices.update(field);
+        Student student = adminServices.update_grade(uuid,field);
+
+        return student;
+
+    }
+
+    @PutMapping("/update/{uuid}/surname/{field}")
+    public Student update_surname(@PathVariable String uuid,@PathVariable String field) {
+
+        logger.info("update certain student");
+        Student student = adminServices.update_surname(uuid,field);
+
+        return student;
 
     }
 

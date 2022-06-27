@@ -13,11 +13,10 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -29,31 +28,17 @@ public class SharedClass {
     private static Logger logger = LogManager.getLogger(SharedClass.class);
     @Autowired
     private  RestTemplate restTemplate;
-   // @Autowired
-   // private MasterDB masterDB;
-   // @Autowired
-   // private MasterDB userDatabase;
 
-    @Autowired
     public SharedClass(RestTemplate restTemplate){
         this.restTemplate = restTemplate;
     };
 
     public static int checkForDocuments(TreeSet<Integer> index) {
 
-        int numOfDocuments = index.size();
-        return numOfDocuments++;
+        int numOfDocuments = index.last();
+        return ++numOfDocuments;
     }
 
-    /*public String getDirUsers() {
-
-        return userDatabase.getDirectoryDB().getCOLLECTION_DIR();
-    }
-
-    public String getDirMaster() {
-
-        return masterDB.getDirectoryDB().getCOLLECTION_DIR();
-    }*/
 
     public  Student fromJson(int field,MasterDB db) {
 
@@ -63,11 +48,6 @@ public class SharedClass {
         String dir = null;
         String filename = null;
         dir = db.getDirectoryDB().getCOLLECTION_DIR();
-        //String dir = this.masterDB.getDirectoryDB().getCOLLECTION_DIR();
-        /*if (db.getDbName().equals("db"))
-            filename = String.valueOf(field);
-        else
-            filename =*/
 
         try (Reader reader = new FileReader(dir+String.valueOf(field)+".json")) {
             student = json.fromJson(reader,Student.class);
@@ -78,6 +58,8 @@ public class SharedClass {
         }
         return student;
     }
+
+
 
 //    public  UsersDB fromJsonUser(int field) {
     public  UsersDB fromJsonUser(String field,MasterDB userDatabase) {
@@ -103,45 +85,49 @@ public class SharedClass {
     public  List<Student> makeRestTemplateRequest(String restUrl) {
 
         logger.info("make Rest Template Request");
-        ResponseEntity<List<Student>> responseEntity = null;
+        ResponseEntity<List<Student>> responseEntity ;
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        responseEntity = restTemplate.exchange("http://localhost:8040/"+restUrl,
+        String url = "http://localhost:8040/"+restUrl;
+        logger.info("url request:"+url);
+        responseEntity = restTemplate.exchange(url,
                 //    responseEntity = restTemplate.exchange("http://slavedb:9080/read",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<Student>>() {}
         );
         List<Student> students = responseEntity.getBody();
-        //     List<Student> students = (List<Student>) restTemplate.getForObject("http://localhost:9080/read",Student.class);
-        //    responseEntity = restTemplate.getForEntity("http://dbsrv-app:8060/course/"+courseName,StudGrades[].class);
 
-        /*HttpStatus status = null;
-        if ( students != null) {
-            status = HttpStatus.OK;
-        }
-        else
-            status = HttpStatus.BAD_REQUEST;*/
 
         return students;
     }
 
-    public List<Path> listFiles(Path path) throws IOException {
+    public List<Student> getAllStudents(MasterDB db) {
 
-        List<Path> result;
-        try (Stream<Path> walk = Files.walk(path)) {
-            result = walk.filter(Files::isRegularFile)
-                    .collect(Collectors.toList());
+        List<Student> students = new ArrayList<>();
+        String dir = db.getDirectoryDB().getCOLLECTION_DIR();
+        try {
+            List<Path> files = db.listFiles(Path.of(dir));
+            files.forEach(s -> {
+                Gson json = new Gson();
+                try (Reader reader = new FileReader(String.valueOf(s))) {
+                    Student student = json.fromJson(reader, Student.class);
+                    students.add(student);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }catch (IOException e) {
+            e.printStackTrace();
         }
-        return result;
+        return students;
     }
-
 
     public static HttpStatus returnStatus(List<Student> students) {
 
         logger.info("return status request");
-        if (students != null)
+        if ((students != null) )
             return HttpStatus.OK;
         else
             return HttpStatus.BAD_REQUEST;

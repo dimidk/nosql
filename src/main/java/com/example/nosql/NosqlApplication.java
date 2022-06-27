@@ -43,24 +43,6 @@ public class NosqlApplication {
                 DatabaseConfig.class);
         MasterDB masterDB = context.getBean("masterDB",MasterDB.class);
         MasterDB userDatabase = context.getBean("userDatabase",MasterDB.class);
-        //server.initializeDatabases();
-
-        //System.out.println(masterDB.getDbName());
-       /* @Bean
-        MasterDB masterDB(){
-            return context.getBean("masterDB",MasterDB.class);
-        } ;
-        @Bean
-        MasterDB userDatabase() {
-
-            return context.getBean("userDatabase",MasterDB.class);
-
-        } ;*/
-
-
-        //server.initializeDatabases();
-
-
 
     }
 

@@ -41,8 +41,19 @@ public class LoadBalance  {
 
     public String roundRobin(String database) {
 
-        String available = databaseInstance.peek();
+        logger.info("load balance:"+database);
+        String available = databaseInstance.poll();
+        logger.info("get first element:"+available);
+        logger.info(databaseInstance.size());
+        for (String ele:databaseInstance) {
+            logger.info(ele);
+        }
+        logger.info("adding at the end");
         databaseInstance.add(available);
+        for (String ele:databaseInstance) {
+            logger.info(ele);
+        }
+
         return available;
     }
 }

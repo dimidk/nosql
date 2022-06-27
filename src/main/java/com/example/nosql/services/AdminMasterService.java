@@ -1,20 +1,22 @@
 package com.example.nosql.services;
 
 import com.example.nosql.InitialService;
+import com.example.nosql.MasterDB;
 import com.example.nosql.schema.Student;
 import com.example.nosql.schema.UsersDB;
 import com.example.nosql.shared.SharedClass;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,178 +27,216 @@ import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 
 @Component
-public class AdminMasterService implements AdminInterface {
+public class AdminMasterService implements AdminInterface,AdminMasterInterface {
 
     @Autowired
-    private InitialService service ;
-    @Autowired
     private RestTemplate restTemplate;
-    //@Autowired
+    @Autowired
+    private MasterDB masterDB;
     private SharedClass sharedClass = new SharedClass(restTemplate);
 
     private Logger logger = LogManager.getLogger(AdminMasterService.class);
     @Autowired
-    public AdminMasterService(InitialService service) {
+    public AdminMasterService(InitialService service) {}
 
-        this.service = service;
-        //super(service);
-        //    SharedClass sharedClass = new SharedClass(restTemplate);
+
+    protected  List<Student> makeRestTemplateRequest(String restUrl) {
+
+        ResponseEntity<List<Student>> responseEntity ;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = "http://localhost:8040/"+restUrl;
+        logger.info("url request:"+url);
+        responseEntity = restTemplate.exchange(url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Student>>() {}
+        );
+        List<Student> students = responseEntity.getBody();
+        return students;
     }
+
+    protected  Student makeSingleRestTemplateRequest(String restUrl) {
+
+        ResponseEntity<Student> responseEntity ;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = "http://localhost:8040/"+restUrl;
+        logger.info("url request:"+url);
+        responseEntity = restTemplate.exchange(url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Student>() {}
+        );
+        Student student = responseEntity.getBody();
+        return student;
+    }
+
+
 
     public HttpStatus write(Student student) {
 
-        if (service == null)
-            System.exit(-1);
+        logger.info("write a student object");
 
-        logger.info("get a student object");
-        logger.info(service.getMasterDB().getDbName());
-        logger.info(service.getUserDatabase().getDbName());
-        logger.info(service.getMasterDB().getDirectoryDB().getCOLLECTION_DIR());
-        if (!service.dbDirExists())
-            service.createDbDir();
         Gson json = new Gson();
-        int objNum = SharedClass.checkForDocuments(service.getMasterDB().getUniqueIndex());
+        int objNum = SharedClass.checkForDocuments(masterDB.getUniqueIndex());
         String filename = String.valueOf(objNum);
-        //    synchronized (this) {
-        String dir = service.getMasterDB().getDirectoryDB().getCOLLECTION_DIR();
-        try (Writer writer = new FileWriter(dir + filename + ".json")) {
-            student.setUuid(objNum);
-            json.toJson(student, writer);
-            logger.info("write new student to db");
-            logger.info("add new student to indexes:"+student.getUuid() +student.getSurname()+student.getGrade());
-            logger.info("indexes size unique,property:"+service.getMasterDB().getUniqueIndex().size()+ service.getMasterDB().getPropertyIndex().size());
-            service.getMasterDB().addUniqueIndex(student.getUuid());
-            logger.info("unique index:"+service.getMasterDB().getUniqueIndex().size());
-            service.getMasterDB().addPropertyIndex(student.getSurname(),String.valueOf(student.getUuid()));
-            logger.info("unique index:"+service.getMasterDB().getPropertyIndex().size());
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (this) {
+            String dir = masterDB.getDirectoryDB().getCOLLECTION_DIR();
+            try (Writer writer = new FileWriter(dir + filename + ".json")) {
+                student.setUuid(objNum);
+                json.toJson(student, writer);
 
+                logger.info("add new student to indexes");
+                masterDB.addUniqueIndex(student.getUuid());
+                masterDB.addPropertyIndex(student.getSurname(), String.valueOf(student.getUuid()));
+            } catch (IOException e) {
+                e.printStackTrace();
+
+            }
+            this.notifyAll();
         }
-        //SharedClass sharedClass = new SharedClass();
-        List<Student> students = sharedClass.makeRestTemplateRequest("update-db");
+        List<Student> students = makeRestTemplateRequest("update-db");
         HttpStatus status = SharedClass.returnStatus(students);
-        //        this.notifyAll();
-        //    }
 
         return status;
 
     }
 
-    @Override
-    public void write(UsersDB userdb) {
+    public Student update_grade(String uuid,String field) {
+
+
+
+        Student student = null;
+        student = sharedClass.fromJson(Integer.valueOf(uuid),masterDB);
+
+        String dir = masterDB.getDirectoryDB().getCOLLECTION_DIR();
+        Gson json = new Gson();
+        try (Writer writer = new FileWriter(dir + String.valueOf(uuid) + ".json")) {
+            student.setGrade(field);
+            json.toJson(student, writer);
+
+        }catch (IOException e ){
+            e.printStackTrace();
+        }
+
+        /*List<Student> students = makeRestTemplateRequest("update-db");
+        HttpStatus status = SharedClass.returnStatus(students);*/
+
+        return student;
 
     }
 
-
-    public void update(String field) {
+    public Student update_surname(String uuid,String field) {
 
         //update wants two parameters one uuid and one the update field
 
         Student student = null;
-        student = sharedClass.fromJson(Integer.valueOf(field),service.getMasterDB());
-        student.setGrade(field);
+        student = sharedClass.fromJson(Integer.valueOf(uuid),masterDB);
+
+        String dir = masterDB.getDirectoryDB().getCOLLECTION_DIR();
+        Gson json = new Gson();
+        try (Writer writer = new FileWriter(dir + String.valueOf(uuid) + ".json")) {
+            student.setSurname(field);
+            json.toJson(student, writer);
+
+        }catch (IOException e ){
+            e.printStackTrace();
+        }
+
+        logger.info("update to property index surname");
+        student = makeSingleRestTemplateRequest("update-json/"+uuid);
+        //HttpStatus status = SharedClass.returnStatus(student);
+
+        return student;
 
     }
 
 
-    public  void delete(String uuid)  {
+    public  HttpStatus delete(String uuid)  {
+
+        logger.info("delete student");
 
         Student student = null;
-        student = sharedClass.fromJson(Integer.valueOf(uuid),service.getMasterDB());
+        student = sharedClass.fromJson(Integer.valueOf(uuid),masterDB);
 
-
-        service.getMasterDB().deletePropertyIndex(student.getSurname(),String.valueOf(student.getUuid()));
-        service.getMasterDB().deleteUniqueIndex(student.getUuid());
+        masterDB.deletePropertyIndex(student.getSurname(),String.valueOf(student.getUuid()));
+        masterDB.deleteUniqueIndex(student.getUuid());
         try {
-            Files.delete(Path.of(service.getMasterDB().getDirectoryDB().getCOLLECTION_DIR() + uuid + ".json"));
+            Files.delete(Path.of(masterDB.getDirectoryDB().getCOLLECTION_DIR() + uuid + ".json"));
         }catch (IOException e) {
             e.printStackTrace();
         }
 
-        List<Student> students = sharedClass.makeRestTemplateRequest("update-db");
+        List<Student> students = makeRestTemplateRequest("update-db");
         HttpStatus status = SharedClass.returnStatus(students);
 
+        return status;
     }
 
-    public  void export_db(String dbName) {
+    public  HttpStatus export_db(String dbName) {
 
         logger.info("export database");
 
         Set<PosixFilePermission> permissions = PosixFilePermissions.fromString("rwxr-xr-x");
         FileAttribute<Set<PosixFilePermission>> fileAttributes = PosixFilePermissions.asFileAttribute(permissions);
         try {
-            String filename = service.getMasterDB().getDirectoryDB().getDATABASE_DIR() + "datafile.txt";
+            String filename = masterDB.getDirectoryDB().getDATABASE_DIR() + "databaseDB.json";
             if (!Files.exists(Path.of(filename)))
                 Files.createFile(Path.of(filename),fileAttributes);
-
-            TreeSet<Integer> uniqIndex = service.getMasterDB().getUniqueIndex();
-            TreeMap<String,List<String>> propIndex = service.getMasterDB().getPropertyIndex();
-
-            logger.info("write each record to datafile");
-            Files.write(Paths.get(filename), "create database file\n".getBytes(), StandardOpenOption.APPEND);
-            Files.write(Paths.get(filename), "Documents\n".getBytes(), StandardOpenOption.APPEND);
-            Files.write(Paths.get(filename), service.getMasterDB().getDirectoryDB().getCOLLECTION_DIR().getBytes(), StandardOpenOption.APPEND);
-            uniqIndex.stream().sorted().forEach(s -> {
-
-                Student student = sharedClass.fromJson(s,service.getMasterDB());
-                Gson json = new Gson();
-                String jsonString = json.toJson(student);
-                try {
-                    Files.write(Paths.get(filename), jsonString.getBytes(), StandardOpenOption.APPEND);
-                    Files.write(Paths.get(filename), "\n".getBytes(), StandardOpenOption.APPEND);
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-            });
-            logger.info("write unique index in datafile");
-            Files.write(Paths.get(filename), "Unique Index of Documents\n".getBytes(), StandardOpenOption.APPEND);
-            uniqIndex.stream().sorted().forEach(s -> {
-
-                try {
-                    Files.write(Paths.get(filename), String.valueOf(s).getBytes(), StandardOpenOption.APPEND);
-                    Files.write(Paths.get(filename), "\n".getBytes(), StandardOpenOption.APPEND);
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
-            });
-            logger.info("write property index in datafile");
-            Files.write(Paths.get(filename), "Property Index of Documents\n".getBytes(), StandardOpenOption.APPEND);
-            for (Map.Entry s:propIndex.entrySet()) {
-                String name = (String) s.getKey();
-                List<String> uuids = (List<String>) s.getValue();
-
-                for (String uuid: uuids) {
-                    try {
-                        Files.write(Paths.get(filename), name.getBytes(), StandardOpenOption.APPEND);
-                        Files.write(Paths.get(filename), "\t".getBytes(), StandardOpenOption.APPEND);
-                        Files.write(Paths.get(filename), uuid.getBytes(), StandardOpenOption.APPEND);
-                        Files.write(Paths.get(filename), "\n".getBytes(), StandardOpenOption.APPEND);
-
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
+            else {
+                Files.deleteIfExists(Path.of(filename));
+                Files.createFile(Path.of(filename),fileAttributes);
             }
+            TreeSet<Integer> uniqIndex = masterDB.getUniqueIndex();
+            TreeMap<String,List<String>> propIndex = masterDB.getPropertyIndex();
+            String dir = masterDB.getDirectoryDB().getCOLLECTION_DIR();
+
+            List<Student> students = sharedClass.getAllStudents(masterDB);
+            Gson json = new Gson();
+            String studentsString = json.toJson(students);
+
+            String uniqueIndexString = json.toJson(uniqIndex);
+            String propIndexString = json.toJson(propIndex);
+
+            Files.write(Paths.get(filename), studentsString.getBytes()
+                    ,StandardOpenOption.APPEND);
+            Files.write(Paths.get(filename), uniqueIndexString.getBytes()
+                    ,StandardOpenOption.APPEND);
+            Files.write(Paths.get(filename), propIndexString.getBytes()
+                    ,StandardOpenOption.APPEND);
+
+            return HttpStatus.OK;
 
         }catch (IOException e) {
             e.printStackTrace();
         }
 
+        return HttpStatus.BAD_REQUEST;
+
     }
 
-    public void import_db(String dbName){
+    public HttpStatus import_db(String dbName){
 
-        logger.info("try to load/import database");
+        //wrong. Δεν κάνω load από μια βάση που δεν υπάρχει. Πρέπει να δημιουργηθούν οι
+        //κατάλογοι και μετά να κάνω import από το αρχείο.
+
+        logger.info("import database");
 
         try {
-            service.getMasterDB().createDbDir();
-            String dir = service.getMasterDB().getDirectoryDB().getCOLLECTION_DIR();
-            service.getMasterDB().loadDatabase(dir);
+            masterDB.createDbDir();
+            String dir = masterDB.getDirectoryDB().getDATABASE_DIR();
+            String lines = String.valueOf(Files.readAllLines(Path.of(dir+"databaseDB.json")));
+            logger.info(lines);
+            Gson json = new Gson();
+            /*Type setType = new TypeToken<List<Student>>(){}.getType();
+            List<Student> students = json.fromJson(lines,setType);
+            students.forEach(s -> logger.info(s));*/
+
+            return HttpStatus.OK;
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

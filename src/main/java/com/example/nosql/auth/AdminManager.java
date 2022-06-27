@@ -37,30 +37,25 @@ public class AdminManager  {
 
         String result = null;
         String db = null;
+        String node = null;
         int uuid = userdb.getUuid();
+
         logger.info("checking for connection");
         logger.info(userdb.getUuid()+ " "+userdb.getUsername() + " in database:"+userDatabase.getDbName());
         UsersDB user = sharedClass.fromJsonUser(userdb.getUsername(),userDatabase);
         logger.info("checking with user in usersdb:"+user.getUsername());
-        if (user.getUuid() == userdb.getUuid() ) {
+        if (user.getUsername().equals(userdb.getUsername()) ) {
+    //    if (user.getUuid() == userdb.getUuid() ) {
             result = "true";
             String database = userdb.getDatabase();
-            db = database;
+            node = loadBalance.roundRobin(database);
+            loadBalance.setUserToNode(String.valueOf(uuid), node);
+            result = node;
         }
-        else
-            db = "false";
-
-        //String node = service.getLoadBalance().roundRobin(db);
-        //service.getLoadBalance().setUserToNode(String.valueOf(uuid),node);
-        String node  = loadBalance.roundRobin(db);
-        loadBalance.setUserToNode(String.valueOf(uuid),node);
-
-        if (node == null)
-            return db;
-
-        result = node;
+        else {
+            result = "false";
+        }
         return result;
-
     }
 
     public String register(UsersDB userdb) {
@@ -70,13 +65,11 @@ public class AdminManager  {
         String filename = String.valueOf(objNum);
         //    synchronized (this) {
         logger.info(userdb.getUuid()+" "+userdb.getUsername()+" "+userdb.getPassword());
-        logger.info(userDatabase.getDbName());
-        logger.info(userDatabase.getDirectoryDB().getDATABASE_DIR());
-        logger.info(userDatabase.getDirectoryDB().getCOLLECTION_DIR());
+
         String dir = userDatabase.getDirectoryDB().getCOLLECTION_DIR();
         userdb.setUuid(objNum);
         logger.info(userdb.getUuid()+ " "+userdb.getUsername()+" "+userdb.getPassword()+" "+userdb.getDatabase());
-        try (Writer writer = new FileWriter(dir + /*filename +*/ userdb.getUsername() +".json")) {
+        try (Writer writer = new FileWriter(dir + userdb.getUsername() +".json")) {
             json.toJson(userdb, writer);
             userDatabase.addUniqueIndex(userdb.getUuid());
             userDatabase.addPropertyIndex(userdb.getUsername(),String.valueOf(userdb.getUuid()));

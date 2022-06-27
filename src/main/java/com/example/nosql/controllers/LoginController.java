@@ -57,19 +57,23 @@ public class LoginController {
 
     @PostMapping("/connect")
     //public String connect(@RequestBody UsersDB user) {
-    public ResponseEntity<Void> connect(@RequestBody UsersDB user) {
+    public UsersDB connect(@RequestBody UsersDB user) {
 
         //Authentication auth = getAuth();
 
         //String username = authName(auth);
         logger.info("in connection control");
         String result = adminManager.connect(user);
+        logger.info("result from checking connection by adminManager:"+result);
         ResponseEntity<Void> responseEntity = null;
 
         if (!result.equals("false")) {
             responseEntity = ResponseEntity.status(HttpStatus.FOUND).location(URI.create(result)).build();
         }
-        return responseEntity;
+        user.setDatabase(result);
+
+        //return result;
+        return user;
     }
 
     @PostMapping("/registration")
