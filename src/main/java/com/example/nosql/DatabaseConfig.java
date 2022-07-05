@@ -23,22 +23,13 @@ public class DatabaseConfig  {
 
         logger.info("create bean db");
         DirectoryClass dirMaster = new DirectoryClass();
-        dirMaster.setDATABASE_DIR("db/");
-        dirMaster.setCOLLECTION_DIR("db/student/");
+        dirMaster.setDATABASE_DIR("/home/boys/Atypon/Final/db/");
+        dirMaster.setCOLLECTION_DIR("/home/boys/Atypon/Final/db/student/");
         logger.info(dirMaster.getCOLLECTION_DIR()+" "+dirMaster.getDATABASE_DIR());
         MasterDB masterDB = new MasterDB(/*PrimitiveDatabase.server,*/dirMaster,"db");
         logger.info("create new bean master db");
-        //masterDB.setDirectoryDB(dirMaster);
-        //masterDB.setDbName("db");
-        /*if (masterDB.dbDirExists()) {
-            try {
-                masterDB.loadDatabase(masterDB.getDirectoryDB().getCOLLECTION_DIR());
-            }catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else*/
-        //    masterDB.createDbDir();
+
+            masterDB.createDbDir();
         try {
             logger.info("database exists and load any");
             logger.info("from dir:"+dirMaster.getCOLLECTION_DIR());
@@ -53,20 +44,13 @@ public class DatabaseConfig  {
     public MasterDB userDatabase() {
 
         DirectoryClass dirUser = new DirectoryClass();
-        dirUser.setDATABASE_DIR("usersDB");
-        dirUser.setCOLLECTION_DIR("usersDB/");
+        dirUser.setDATABASE_DIR("/home/boys/Atypon/Final/usersDB");
+        dirUser.setCOLLECTION_DIR("/home/boys/Atypon/Final/usersDB/");
         MasterDB userDatabase = new MasterDB(/*PrimitiveDatabase.server,*/dirUser,"usersDB");
         //userDatabase.setDirectoryDB(dirUser);
         //userDatabase.setDbName("usersDB");
-        /*if (userDatabase.dbDirExists()) {
-            try {
-                userDatabase.loadDatabase(userDatabase.getDirectoryDB().getCOLLECTION_DIR());
-            }catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else*/
-        //    userDatabase.createDbDir();
+
+            userDatabase.createDbDir();
         try {
             userDatabase.loadDatabase(dirUser.getCOLLECTION_DIR());
         }catch (IOException e) {

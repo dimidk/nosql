@@ -58,7 +58,7 @@ public class AdminManager  {
         return result;
     }
 
-    public String register(UsersDB userdb) {
+    public UsersDB register(UsersDB userdb) {
 
         Gson json = new Gson();
         int objNum = SharedClass.checkForDocuments(userDatabase.getUniqueIndex());
@@ -76,7 +76,8 @@ public class AdminManager  {
         }catch (IOException e) {
             e.printStackTrace();
         }
-        return "OK! User created";
+        //return "OK! User created";
+        return userdb;
     }
 
 

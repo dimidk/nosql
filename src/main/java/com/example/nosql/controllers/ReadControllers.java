@@ -8,7 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,17 +37,56 @@ public class ReadControllers {
 
     private Logger logger = LogManager.getLogger(ReadControllers.class);
 
+
+    public  List<Student> makeRestTemplateRequest(String restUrl) {
+
+        logger.info("make Rest Template Request");
+        ResponseEntity<List<Student>> responseEntity ;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        //    String url = "http://localhost:8060/"+restUrl;
+        String url = "http://localhost:8060/"+restUrl;
+        logger.info("url request:"+url);
+        responseEntity = restTemplate.exchange(url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<Student>>() {}
+        );
+
+        List<Student> students = responseEntity.getBody();
+        return students;
+    }
+
+    protected  Student makeSingleRestTemplateRequest(String restUrl) {
+
+        ResponseEntity<Student> responseEntity ;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String url = "http://localhost:8060/"+restUrl;
+        logger.info("url request:"+url);
+        responseEntity = restTemplate.exchange(url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Student>() {}
+        );
+        Student student = responseEntity.getBody();
+        return student;
+    }
+
     @RequestMapping(value="/read",method= RequestMethod.GET,
             consumes = {"*/*"})
-    public HttpStatus read() {
+    public List<Student> read() {
 
         logger.info("return all students");
 
         HttpStatus status = null;
-        List<Student> students = sharedClass.makeRestTemplateRequest("read");
+    //    List<Student> students = sharedClass.makeRestTemplateRequest("read");
+        List<Student> students = makeRestTemplateRequest("read");
         status = SharedClass.returnStatus(students);
 
-        return status;
+        return  students;
     }
 
     @RequestMapping(value="/read/{uuid}",method= RequestMethod.GET,
@@ -58,11 +98,11 @@ public class ReadControllers {
         return student;*/
 
         HttpStatus status = null;
-        List<Student> students = sharedClass.makeRestTemplateRequest("read/"+uuid);
-        status = SharedClass.returnStatus(students);
+    //    List<Student> students = sharedClass.makeRestTemplateRequest("read/"+uuid);
+        Student student = makeSingleRestTemplateRequest("read/"+uuid);
+    //    status = SharedClass.returnStatus(student);
 
-
-        return students.get(0);
+        return student;
     }
 
     @RequestMapping(value="/read/stud-name",method= RequestMethod.GET,
@@ -75,7 +115,8 @@ public class ReadControllers {
 
 
         HttpStatus status = null;
-        List<Student> students = sharedClass.makeRestTemplateRequest("read/stud-name");
+    //    List<Student> students = sharedClass.makeRestTemplateRequest("read/stud-name");
+        List<Student> students = makeRestTemplateRequest("read/stud-name");
         status = SharedClass.returnStatus(students);
 
         return students;

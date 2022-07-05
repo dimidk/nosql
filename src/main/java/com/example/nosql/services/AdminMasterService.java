@@ -46,7 +46,8 @@ public class AdminMasterService implements AdminInterface,AdminMasterInterface {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "http://localhost:8040/"+restUrl;
+    //    String url = "http://localhost:8060/"+restUrl;
+        String url = "http://localhost:8060/"+restUrl;
         logger.info("url request:"+url);
         responseEntity = restTemplate.exchange(url,
                 HttpMethod.GET,
@@ -63,7 +64,7 @@ public class AdminMasterService implements AdminInterface,AdminMasterInterface {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "http://localhost:8040/"+restUrl;
+        String url = "http://localhost:8060/"+restUrl;
         logger.info("url request:"+url);
         responseEntity = restTemplate.exchange(url,
                 HttpMethod.GET,
@@ -129,22 +130,73 @@ public class AdminMasterService implements AdminInterface,AdminMasterInterface {
 
     }
 
+    /*protected String getKeyByValue(TreeMap<String,List<String>> tree, String value) {
+
+        String findKey = null;
+
+
+        for (Map.Entry<String, List<String>> e: tree.entrySet()) {
+            String key = (String) e.getKey();
+            logger.info(key);
+            for (String s :e.getValue()) {
+                if (s.equals(value)) {
+                    findKey = key;
+                    break;
+                }
+            }
+        }
+
+        return findKey;
+    }*/
+
+//    protected void updatePropertyIndex(String uuid,String field) {
+    protected void updatePropertyIndex(String uuid,String oldSurname,String newSurname) {
+
+    //    String dir = masterDB.getDirectoryDB().getCOLLECTION_DIR();
+
+        TreeMap<String, List<String>> temp = masterDB.getPropertyIndex();
+
+        if (temp.get(oldSurname).size() == 1) {
+            List<String> uuidList = masterDB.getPropertyIndex().get(oldSurname);
+            masterDB.getPropertyIndex().remove(oldSurname,uuidList);
+        }
+        else
+            masterDB.getPropertyIndex().get(oldSurname).remove(uuid);
+
+        if (!temp.containsKey(newSurname)) {
+            masterDB.getPropertyIndex().put(newSurname,new ArrayList<>());
+            masterDB.getPropertyIndex().get(newSurname).add(uuid);
+        }
+        else {
+            masterDB.getPropertyIndex().get(newSurname).add(uuid);
+        }
+
+
+
+
+    }
+
     public Student update_surname(String uuid,String field) {
 
         //update wants two parameters one uuid and one the update field
 
         Student student = null;
+        String oldSurname = null;
         student = sharedClass.fromJson(Integer.valueOf(uuid),masterDB);
 
         String dir = masterDB.getDirectoryDB().getCOLLECTION_DIR();
         Gson json = new Gson();
         try (Writer writer = new FileWriter(dir + String.valueOf(uuid) + ".json")) {
+
+            oldSurname = student.getSurname();
             student.setSurname(field);
             json.toJson(student, writer);
 
         }catch (IOException e ){
             e.printStackTrace();
         }
+
+        updatePropertyIndex(uuid,oldSurname,field);
 
         logger.info("update to property index surname");
         student = makeSingleRestTemplateRequest("update-json/"+uuid);

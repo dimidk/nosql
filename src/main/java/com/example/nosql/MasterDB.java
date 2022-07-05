@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
@@ -49,7 +50,8 @@ public class MasterDB extends PrimitiveDatabase {
             FileAttribute<Set<PosixFilePermission>> fileAttributes = PosixFilePermissions.asFileAttribute(permissions);
             try {
                 String mainDir = this.getDirectoryDB().getCOLLECTION_DIR();
-                Files.createDirectories(Path.of(mainDir), fileAttributes);
+                Files.createDirectories(Paths.get(mainDir));
+               // Files.createDirectories(Path.of(mainDir), fileAttributes);
                 logger.info("create main database directory");
 
             }catch (IOException e) {

@@ -77,11 +77,12 @@ public class LoginController {
     }
 
     @PostMapping("/registration")
-    public String register(@RequestBody UsersDB user) {
+    public UsersDB register(@RequestBody UsersDB user) {
 
         logger.info("register new User");
-        String usersDBToken = adminManager.register(user);
-        return usersDBToken;
+        //String usersDBToken = adminManager.register(user);
+        UsersDB usersDB = adminManager.register(user);
+        return usersDB;
     }
 
     @GetMapping("/disconnect")

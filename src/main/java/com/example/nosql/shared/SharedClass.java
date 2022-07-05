@@ -5,6 +5,7 @@ import com.example.nosql.MasterDB;
 import com.example.nosql.schema.Student;
 import com.example.nosql.schema.UsersDB;
 import com.google.gson.Gson;
+import org.apache.catalina.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,11 @@ public class SharedClass {
 
     public static int checkForDocuments(TreeSet<Integer> index) {
 
-        int numOfDocuments = index.last();
+        int numOfDocuments ;
+        if (index.size() != 0)
+            numOfDocuments = index.last();
+        else
+            numOfDocuments = 0;
         return ++numOfDocuments;
     }
 
@@ -81,7 +86,7 @@ public class SharedClass {
         }
         return userdb;
     }
-
+//big problem with this method. Don't work from here, only in each class
     public  List<Student> makeRestTemplateRequest(String restUrl) {
 
         logger.info("make Rest Template Request");
@@ -89,17 +94,15 @@ public class SharedClass {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        String url = "http://localhost:8040/"+restUrl;
+        //    String url = "http://localhost:8060/"+restUrl;
+        String url = "http://localhost:8060/"+restUrl;
         logger.info("url request:"+url);
         responseEntity = restTemplate.exchange(url,
-                //    responseEntity = restTemplate.exchange("http://slavedb:9080/read",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<Student>>() {}
         );
         List<Student> students = responseEntity.getBody();
-
-
         return students;
     }
 
@@ -122,6 +125,27 @@ public class SharedClass {
             e.printStackTrace();
         }
         return students;
+    }
+
+    public List<UsersDB> getAllUsersDB(MasterDB db) {
+
+        List<UsersDB> users = new ArrayList<>();
+        String dir = db.getDirectoryDB().getCOLLECTION_DIR();
+        try {
+            List<Path> files = db.listFiles(Path.of(dir));
+            files.forEach(s -> {
+                Gson json = new Gson();
+                try (Reader reader = new FileReader(String.valueOf(s))) {
+                    UsersDB user = json.fromJson(reader, UsersDB.class);
+                    users.add(user);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+        return users;
     }
 
     public static HttpStatus returnStatus(List<Student> students) {
