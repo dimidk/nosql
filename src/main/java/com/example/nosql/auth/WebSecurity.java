@@ -20,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Configuration
@@ -33,6 +34,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     private MasterDB userDatabase;
 
     private SharedClass sharedClass = new SharedClass(restTemplate);
+    @Autowired
+    private JWTFilter jwtFilter;
 
     @Override
     @Bean
@@ -58,11 +61,18 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .httpBasic().disable()
                 .formLogin().disable()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeHttpRequests()
-                .anyRequest()
-                .permitAll();
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.exceptionHandling().authenticationEntryPoint(
+                ((request, response, authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED,authException.getMessage());
+                })
+        );
+
+        http.authorizeHttpRequests()
+                .antMatchers("/auth/connect").permitAll()
+                .anyRequest().authenticated();
+        http.addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class);
 
     }
 }
