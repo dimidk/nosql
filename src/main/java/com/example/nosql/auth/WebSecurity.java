@@ -1,34 +1,68 @@
-/*package com.example.nosql.auth;
+package com.example.nosql.auth;
 
+import com.example.nosql.MasterDB;
+import com.example.nosql.shared.SharedClass;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
-public class WebSecurity {
+@EnableAutoConfiguration
+public class WebSecurity extends WebSecurityConfigurerAdapter {
 
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+   // @Autowired
+    private RestTemplate restTemplate;
+    @Autowired
+    private MasterDB userDatabase;
 
-    //    CustomUsernamePasswordAuthenticationFilter myAuthFilter = new CustomUsernamePasswordAuthenticationFilter();
-    //    myAuthFilter.setAuthenticationManager(authenticationManager(new AuthenticationConfiguration()));
+    private SharedClass sharedClass = new SharedClass(restTemplate);
 
-        //http.cors();
-        //http.csrf().disable();
-        //http.httpBasic();
-        http.formLogin().disable();
-        http.cors().and()
-
-                .authorizeHttpRequests()
-                .antMatchers("/connect/**").permitAll()
-                .antMatchers("/registration**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .addFilterAt(new JWTAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
+    @Override
+    @Bean
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
-}*/
+
+    @Bean
+    public PasswordEncoder getPasswordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
+    }
+
+   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+        auth.userDetailsService(username -> {
+            return sharedClass.fromJsonUser(username,userDatabase);
+        });
+    }
+
+    protected void configure(HttpSecurity http) throws Exception {
+
+        http.csrf().disable()
+                .httpBasic().disable()
+                .formLogin().disable()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeHttpRequests()
+                .anyRequest()
+                .permitAll();
+
+    }
+}

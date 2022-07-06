@@ -5,6 +5,8 @@ public class UsersDBToken {
     private String username;
     private String token;
 
+    public UsersDBToken() {}
+
     public UsersDBToken(String username, String token) {
         this.username = username;
         this.token = token;

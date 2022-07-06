@@ -1,8 +1,13 @@
 package com.example.nosql.schema;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-public class UsersDB implements Comparable{
+import java.util.Collection;
+
+public class UsersDB implements UserDetails {
+
 
     private static Integer userObj=0;
 
@@ -64,10 +69,30 @@ public class UsersDB implements Comparable{
         this.database = database;
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
 
     @Override
-    public int compareTo(Object o) {
-
-        return 0;
+    public boolean isAccountNonExpired() {
+        return true;
     }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+
 }

@@ -2,6 +2,7 @@ package com.example.nosql.controllers;
 
 import com.example.nosql.auth.AdminManager;
 import com.example.nosql.LoadBalance;
+import com.example.nosql.auth.JWTUtil;
 import com.example.nosql.schema.UsersDB;
 import com.example.nosql.schema.UsersDBToken;
 import org.apache.logging.log4j.LogManager;
@@ -9,6 +10,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +29,11 @@ public class LoginController {
     private LoadBalance loadBalance;
     @Autowired
     private AdminManager adminManager;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JWTUtil jwtUtil;
 
     /*protected String authName(Authentication auth) {
 
@@ -55,25 +65,38 @@ public class LoginController {
         return "index";
     }
 
-    @PostMapping("/connect")
+    @PostMapping("/auth/connect")
     //public String connect(@RequestBody UsersDB user) {
-    public UsersDB connect(@RequestBody UsersDB user) {
+    public ResponseEntity<?> connect(@RequestBody UsersDB user) {
 
-        //Authentication auth = getAuth();
+        try {
 
-        //String username = authName(auth);
-        logger.info("in connection control");
-        String result = adminManager.connect(user);
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
+            );
+            UsersDB usersDB = (UsersDB) authentication.getPrincipal();
+        //    String accessToken = "Try to JWT token";
+            String accessToken = jwtUtil.generateToken(usersDB);
+            UsersDBToken usersDBToken = new UsersDBToken(usersDB.getUsername(),accessToken);
+
+            return ResponseEntity.ok(usersDBToken);
+
+        }catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        /*String result = adminManager.connect(user);
         logger.info("result from checking connection by adminManager:"+result);
         ResponseEntity<Void> responseEntity = null;
 
         if (!result.equals("false")) {
+            //this is for forwarding to an instance node database
             responseEntity = ResponseEntity.status(HttpStatus.FOUND).location(URI.create(result)).build();
         }
         user.setDatabase(result);
 
         //return result;
-        return user;
+        return user;*/
     }
 
     @PostMapping("/registration")
