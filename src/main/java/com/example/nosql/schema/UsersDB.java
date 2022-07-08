@@ -5,6 +5,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UsersDB implements UserDetails {
 
@@ -23,6 +25,9 @@ public class UsersDB implements UserDetails {
     @JsonProperty("database")
     String database;
 
+    @JsonProperty
+    private Set<Role> roles = new HashSet<>();
+
     public UsersDB(){}
 
     public UsersDB(String username, String password, String role,String database) {
@@ -30,7 +35,21 @@ public class UsersDB implements UserDetails {
         this.username = username;
         this.password = password;
         this.role = role;
+    //    this.roles.add(role);
+
         this.database = database;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public void addRole(Role role) {
+        this.roles.add(role);
     }
 
     public int getUuid() {

@@ -16,6 +16,7 @@ public class JWTUtil {
     private  Logger logger = LogManager.getLogger(JWTUtil.class);
 
     private static final long EXPIRE_DURATION = 24 * 60 * 60 * 1000;  //24h expired token;
+    //@Value("${app.jwt.secret}")
     @Value("${app.jwt.secret}")
     private String secretKey ;
 
@@ -23,6 +24,7 @@ public class JWTUtil {
 
         return Jwts.builder()
                 .setSubject(usersDB.getUsername())
+                .claim("roles",usersDB.getRole())
                 .setIssuer("NoSQL_DB")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis()+EXPIRE_DURATION))
@@ -56,7 +58,7 @@ public class JWTUtil {
         return parseClaims(token).getSubject();
     }
 
-    private Claims parseClaims(String token) {
+    public Claims parseClaims(String token) {
         return Jwts.parser().setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody();

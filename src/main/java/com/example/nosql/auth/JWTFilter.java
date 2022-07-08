@@ -2,6 +2,7 @@ package com.example.nosql.auth;
 
 import com.example.nosql.schema.UsersDB;
 import com.example.nosql.schema.UsersDBToken;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Map;
 
 @Component
 public class JWTFilter extends OncePerRequestFilter {
@@ -59,8 +61,14 @@ public class JWTFilter extends OncePerRequestFilter {
     private UserDetails getUserDetails(String accessToken) {
         //UsersDBToken userDetails = new UsersDBToken();
         UsersDB userDetails = new UsersDB();
-        String username = jwtUtil.getSubjectToken(accessToken);
+
+        Claims claims = jwtUtil.parseClaims(accessToken);
+        String username = (String) claims.get(Claims.SUBJECT);
+        String roles = (String) claims.get("roles");
+
+    //    String username = jwtUtil.getSubjectToken(accessToken);
         userDetails.setUsername(username);
+        userDetails.setRole(roles);
 
         return userDetails;
     }

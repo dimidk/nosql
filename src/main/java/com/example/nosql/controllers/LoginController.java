@@ -72,6 +72,7 @@ public class LoginController {
         try {
 
             Authentication authentication = authenticationManager.authenticate(
+         //           new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword(),user.getRoles())
                     new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
             );
             UsersDB usersDB = (UsersDB) authentication.getPrincipal();
@@ -108,7 +109,7 @@ public class LoginController {
         return usersDB;
     }
 
-    @GetMapping("/disconnect")
+    @GetMapping("/auth/disconnect")
     public String disconnect() {
         return "logout";
     }
