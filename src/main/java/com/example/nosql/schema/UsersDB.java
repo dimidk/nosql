@@ -2,11 +2,10 @@ package com.example.nosql.schema;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class UsersDB implements UserDetails {
 
@@ -25,22 +24,22 @@ public class UsersDB implements UserDetails {
     @JsonProperty("database")
     String database;
 
-    @JsonProperty
-    private Set<Role> roles = new HashSet<>();
+   // @JsonProperty
+   // private Set<Role> roles = new HashSet<>();
 
     public UsersDB(){}
 
-    public UsersDB(String username, String password, String role,String database) {
+    public UsersDB(String username, String password, String role,Set<Role> roles,String database) {
         this.uuid = userObj++;
         this.username = username;
         this.password = password;
         this.role = role;
-    //    this.roles.add(role);
+    //    this.roles = roles;
 
         this.database = database;
     }
 
-    public Set<Role> getRoles() {
+    /*public Set<Role> getRoles() {
         return roles;
     }
 
@@ -50,7 +49,7 @@ public class UsersDB implements UserDetails {
 
     public void addRole(Role role) {
         this.roles.add(role);
-    }
+    }*/
 
     public int getUuid() {
         return uuid;
@@ -90,7 +89,10 @@ public class UsersDB implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(this.getRole()));
+        return authorities;
     }
 
     @Override

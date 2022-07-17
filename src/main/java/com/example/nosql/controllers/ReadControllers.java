@@ -13,6 +13,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.security.RolesAllowed;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -123,6 +124,7 @@ public class ReadControllers {
     }
 
     @GetMapping("/read/stud-name/{surname}")
+    @RolesAllowed({"ROLE_USER","ROLE_ADMIN"})
     public List<Student> read_name(@PathVariable String surname){
 
         logger.info("read students with name:"+surname);

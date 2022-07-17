@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.FileWriter;
@@ -58,17 +59,18 @@ public class AdminManager  {
         return result;
     }
 
-    public UsersDB register(UsersDB userdb) {
+    public UsersDB register( UsersDB userdb) {
 
         Gson json = new Gson();
         int objNum = SharedClass.checkForDocuments(userDatabase.getUniqueIndex());
         String filename = String.valueOf(objNum);
         //    synchronized (this) {
-        logger.info(userdb.getUuid()+" "+userdb.getUsername()+" "+userdb.getPassword());
 
         String dir = userDatabase.getDirectoryDB().getCOLLECTION_DIR();
         userdb.setUuid(objNum);
-        logger.info(userdb.getUuid()+ " "+userdb.getUsername()+" "+userdb.getPassword()+" "+userdb.getDatabase());
+        logger.info(userdb.getUuid()+ " "+userdb.getUsername()+" "
+                +userdb.getPassword()+" "+userdb.getRole());
+        //        + userdb.getRoles());
         try (Writer writer = new FileWriter(dir + userdb.getUsername() +".json")) {
             json.toJson(userdb, writer);
             userDatabase.addUniqueIndex(userdb.getUuid());

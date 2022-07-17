@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.RolesAllowed;
 import java.io.IOException;
 @RestController
 @Configuration
@@ -36,6 +37,7 @@ public class AdminControllers {
     }
 
     @PostMapping("/write")
+    @RolesAllowed("ROLE_ADMIN")
     public void write(@RequestBody Student student) {
 
         logger.info("write for student:"+student);

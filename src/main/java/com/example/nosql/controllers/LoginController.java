@@ -5,6 +5,7 @@ import com.example.nosql.LoadBalance;
 import com.example.nosql.auth.JWTUtil;
 import com.example.nosql.schema.UsersDB;
 import com.example.nosql.schema.UsersDBToken;
+import io.jsonwebtoken.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,14 +74,24 @@ public class LoginController {
 
             Authentication authentication = authenticationManager.authenticate(
          //           new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword(),user.getRoles())
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(),user.getAuthorities())
             );
-            UsersDB usersDB = (UsersDB) authentication.getPrincipal();
-        //    String accessToken = "Try to JWT token";
-            String accessToken = jwtUtil.generateToken(usersDB);
-            UsersDBToken usersDBToken = new UsersDBToken(usersDB.getUsername(),accessToken);
 
-            return ResponseEntity.ok(usersDBToken);
+
+            UsersDB usersDB = (UsersDB) authentication.getPrincipal();
+            logger.info(usersDB.getUsername()+ " "+usersDB.getPassword()+" "+usersDB.getAuthorities());
+            if (usersDB.getPassword().equals(user.getPassword()) && usersDB.getAuthorities().equals(user.getAuthorities()))
+            {
+                //    String accessToken = "Try to JWT token";
+                String accessToken = jwtUtil.generateToken(usersDB);
+                UsersDBToken usersDBToken = new UsersDBToken(usersDB.getUsername(), accessToken);
+                return ResponseEntity.ok(usersDBToken);
+            }
+            else {
+                logger.info("BAD password or BAD role");
+            }
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         }catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
