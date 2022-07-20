@@ -21,6 +21,7 @@ public class AdminControllers {
     private Logger logger = LogManager.getLogger(AdminControllers.class);
 
     @GetMapping("/export/{dbName}")
+    @RolesAllowed("ROLE_ADMIN")
     public void export(@PathVariable String dbName) {
 
         logger.info("export database");
@@ -29,6 +30,7 @@ public class AdminControllers {
     }
 
     @GetMapping("/import/{dbName}")
+    @RolesAllowed("ROLE_ADMIN")
     public void import_db(@PathVariable String dbName) {
 
         logger.info("import database");
@@ -52,6 +54,7 @@ public class AdminControllers {
 
 
     @PutMapping("/update/{uuid}/grade/{field}")
+    @RolesAllowed("ROLE_ADMIN")
     public Student update_grade(@PathVariable String uuid,@PathVariable String field) {
 
         logger.info("update certain student");
@@ -62,6 +65,7 @@ public class AdminControllers {
     }
 
     @PutMapping("/update/{uuid}/surname/{field}")
+    @RolesAllowed("ROLE_ADMIN")
     public Student update_surname(@PathVariable String uuid,@PathVariable String field) {
 
         logger.info("update certain student");
@@ -73,6 +77,7 @@ public class AdminControllers {
 
 
     @DeleteMapping("/delete/{uuid}")
+    @RolesAllowed("ROLE_ADMIN")
     public void delete(@PathVariable String uuid) throws IOException {
 
         logger.info("delete certain student");

@@ -78,6 +78,7 @@ public class ReadControllers {
 
     @RequestMapping(value="/read",method= RequestMethod.GET,
             consumes = {"*/*"})
+    @RolesAllowed({"ROLE_USER","ROLE_ADMIN"})
     public List<Student> read() {
 
         logger.info("return all students");
@@ -92,6 +93,7 @@ public class ReadControllers {
 
     @RequestMapping(value="/read/{uuid}",method= RequestMethod.GET,
             consumes = {"*/*"})
+    @RolesAllowed({"ROLE_USER","ROLE_ADMIN"})
     public Student read(@PathVariable String uuid) {
 
         logger.info("return student with uuid:"+uuid);
@@ -108,6 +110,7 @@ public class ReadControllers {
 
     @RequestMapping(value="/read/stud-name",method= RequestMethod.GET,
             consumes = {"*/*"})
+    @RolesAllowed({"ROLE_USER","ROLE_ADMIN"})
     public List<Student> read_name(){
 
         logger.info("read students by name");

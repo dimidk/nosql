@@ -4,12 +4,14 @@ public class UsersDBToken {
 
     private String username;
     private String token;
+    private String database;
 
     public UsersDBToken() {}
 
-    public UsersDBToken(String username, String token) {
+    public UsersDBToken(String username, String token,String database) {
         this.username = username;
         this.token = token;
+        this.database = database;
     }
 
     public String getUsername() {
@@ -27,4 +29,8 @@ public class UsersDBToken {
     public void setToken(String token) {
         this.token = token;
     }
+
+    public String getDatabase() { return database;}
+
+    public void setDatabase(String database) { this.database = database;}
 }

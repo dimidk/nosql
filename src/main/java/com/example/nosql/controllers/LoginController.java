@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.security.RolesAllowed;
 import java.net.URI;
 
 @RestController
@@ -35,28 +36,6 @@ public class LoginController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private JWTUtil jwtUtil;
-
-    /*protected String authName(Authentication auth) {
-
-        //SecurityContext context = SecurityContextHolder.getContext();
-        //Authentication authentication = context.getAuthentication();
-
-        String userAuth = auth.getName();
-        Object principal = auth.getPrincipal();
-
-        return userAuth;
-    }
-
-    protected Authentication getAuth() {
-
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-
-        return authentication;
-    }*/
-
- //   @Autowired
- //   private AuthenticationManager authenticationManager;
 
 
     @GetMapping("/default-user")
@@ -84,7 +63,8 @@ public class LoginController {
             {
                 //    String accessToken = "Try to JWT token";
                 String accessToken = jwtUtil.generateToken(usersDB);
-                UsersDBToken usersDBToken = new UsersDBToken(usersDB.getUsername(), accessToken);
+                String dbase = loadBalance.roundRobin(new String());
+                UsersDBToken usersDBToken = new UsersDBToken(usersDB.getUsername(), accessToken,dbase);
                 return ResponseEntity.ok(usersDBToken);
             }
             else {
@@ -112,6 +92,7 @@ public class LoginController {
     }
 
     @PostMapping("/registration")
+    @RolesAllowed("ROLE_ADMIN")
     public UsersDB register(@RequestBody UsersDB user) {
 
         logger.info("register new User");
